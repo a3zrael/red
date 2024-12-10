@@ -1,39 +1,19 @@
-import "./App.scss";
+import styles from "./App.module.scss";
 import { SwitchTheme } from "../comp/switch-theme/ui";
 import { useTheme } from "../comp/theme/";
 import { SwitchSounds } from "../comp/switch-sound";
 import { SwitchAll } from "../comp/switch-all";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import sound_1 from "../comp/switch-sound/audio/sound_1.wav";
 
-const App = () => {
-  const [themeActive, setThemeActive] = useState<boolean>(true);
+const App: FC = () => {
+  const [themeActive, setThemeActive] = useState<boolean>(false);
   const [audioActive, setAudioActive] = useState<boolean>(false);
-  const [toggleAll, setToggleAll] = useState<boolean>(false);
+  const [toggleAll, setToggleAll] = useState<boolean>(true);
 
-  const [stack, setStack] = useState<Set<string>>(new Set());
-
-  const callStack = useCallback(() => {
-    const firstElem = stack.values().next().value;
-
-    if (stack.size === 3) {
-      if (firstElem === "theme") {
-        toggleThemeState();
-      }
-      if (firstElem === "audio") {
-        toggleAudioState();
-      }
-      if (firstElem === "changeAll") {
-        changeAll();
-      }
-      setStack(new Set());
-    }
-  }, [stack]);
-
-  useEffect(() => {
-    callStack();
-  }, [callStack, stack.size]);
+  // stack функций
+  const [stack, setStack] = useState<string[]>(["changeAll"]);
 
   // Смена темы
   const { theme, toggleTheme } = useTheme();
@@ -44,7 +24,7 @@ const App = () => {
 
   useEffect(() => {
     audioRef.current = new Audio(sound_1);
-    audioRef.current.volume = 0;
+    audioRef.current.volume = 0.1;
   }, []);
 
   function toggleAudio() {
@@ -62,41 +42,52 @@ const App = () => {
     }
   }
 
-  const toggleThemeState = () => {
+  useEffect(() => {
+    if (stack.length === 3) {
+      switch (stack[1]) {
+        case "theme":
+          toggleThemeState();
+          break;
+        case "audio":
+          toggleAudioState();
+          break;
+        case "changeAll":
+          changeAll();
+          break;
+      }
+    }
+  });
+
+  const updateStack = (action: string) => {
     setStack((prev) => {
-      const temporarySet = new Set(prev);
-      temporarySet.add("theme");
-      return temporarySet;
+      if (prev.includes(action)) {
+        return prev.filter((elem) => elem !== action);
+      }
+      return [...prev, action];
     });
+  };
+
+  const toggleThemeState = () => {
     toggleTheme();
     setThemeActive((prev) => !prev);
+    updateStack("theme");
   };
 
   const toggleAudioState = () => {
-    setStack((prev) => {
-      const temporarySet = new Set(prev);
-      temporarySet.add("audio");
-      return temporarySet;
-    });
     toggleAudio();
     setAudioActive((prev) => !prev);
+    updateStack("audio");
   };
 
   const changeAll = () => {
-    setStack((prev) => {
-      const temporarySet = new Set(prev);
-      temporarySet.add("changeAll");
-      return temporarySet;
-    });
-    toggleTheme();
-    setThemeActive((prev) => !prev);
-    toggleAudio();
-    setAudioActive((prev) => !prev);
+    toggleAudioState();
+    toggleThemeState();
     setToggleAll((prev) => !prev);
+    updateStack("changeAll");
   };
 
   return (
-    <div className="switch-container">
+    <div className={styles.switchContainer}>
       <SwitchTheme
         isChecked={themeActive}
         theme={theme}
