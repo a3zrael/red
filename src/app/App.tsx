@@ -1,22 +1,22 @@
 import styles from "./App.module.scss";
-import { SwitchTheme } from "../comp/switch-theme/ui";
+
 import { useTheme } from "../comp/theme/";
-import { SwitchSounds } from "../comp/switch-sound";
-import { SwitchAll } from "../comp/switch-all";
+
 import { FC, useEffect, useRef, useState } from "react";
 
 import sound_1 from "../comp/switch-sound/audio/sound_1.wav";
+import { ToggleSwitch } from "../comp/base/toggle-switch";
 
 const App: FC = () => {
-  const [themeActive, setThemeActive] = useState<boolean>(false);
-  const [audioActive, setAudioActive] = useState<boolean>(false);
-  const [toggleAll, setToggleAll] = useState<boolean>(true);
+  const [isThemeActive, setThemeActive] = useState<boolean>(false);
+  const [isAudioActive, setAudioActive] = useState<boolean>(false);
+  const [isToggleAll, setToggleAll] = useState<boolean>(true);
 
   // stack функций
   const [stack, setStack] = useState<string[]>(["changeAll"]);
 
   // Смена темы
-  const { theme, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme();
 
   // Аудио
   const [audioState, setAudioState] = useState(false);
@@ -24,8 +24,26 @@ const App: FC = () => {
 
   useEffect(() => {
     audioRef.current = new Audio(sound_1);
-    audioRef.current.volume = 0.1;
+    audioRef.current.volume = 0;
   }, []);
+
+  const data = [
+    {
+      title: "change theme",
+      isChecked: isThemeActive,
+      onChange: toggleThemeState,
+    },
+    {
+      title: "audio",
+      isChecked: isAudioActive,
+      onChange: toggleAudioState,
+    },
+    {
+      title: "toggle all",
+      isChecked: isToggleAll,
+      onChange: toggleAll,
+    },
+  ];
 
   function toggleAudio() {
     if (!audioRef.current) {
@@ -52,7 +70,7 @@ const App: FC = () => {
           toggleAudioState();
           break;
         case "changeAll":
-          changeAll();
+          toggleAll();
           break;
       }
     }
@@ -67,34 +85,33 @@ const App: FC = () => {
     });
   };
 
-  const toggleThemeState = () => {
+  function toggleThemeState() {
     toggleTheme();
     setThemeActive((prev) => !prev);
     updateStack("theme");
-  };
+  }
 
-  const toggleAudioState = () => {
+  function toggleAudioState() {
     toggleAudio();
     setAudioActive((prev) => !prev);
     updateStack("audio");
-  };
+  }
 
-  const changeAll = () => {
+  function toggleAll() {
     toggleAudioState();
     toggleThemeState();
     setToggleAll((prev) => !prev);
     updateStack("changeAll");
-  };
+  }
 
   return (
     <div className={styles.switchContainer}>
-      <SwitchTheme
-        isChecked={themeActive}
-        theme={theme}
-        toggleTheme={toggleThemeState}
-      />
-      <SwitchSounds isChecked={audioActive} toggleAudio={toggleAudioState} />
-      <SwitchAll isChecked={toggleAll} changeAll={changeAll} />
+      {data.map(({ title, isChecked, onChange }) => (
+        <div className={styles.themeWrapper}>
+          <ToggleSwitch isChecked={isChecked} onChange={onChange} /> -
+          <span>{title}</span>
+        </div>
+      ))}
     </div>
   );
 };
