@@ -4,7 +4,8 @@ import { useTheme } from "../comp/theme/";
 
 import { FC, useEffect, useRef, useState } from "react";
 
-import sound_1 from "../comp/switch-sound/audio/sound_1.wav";
+import sound_1 from "../assets/sound_1.wav";
+
 import { ToggleSwitch } from "../comp/base/toggle-switch";
 
 const App: FC = () => {
@@ -24,7 +25,7 @@ const App: FC = () => {
 
   useEffect(() => {
     audioRef.current = new Audio(sound_1);
-    audioRef.current.volume = 0;
+    audioRef.current.volume = 0.1;
   }, []);
 
   const data = [
