@@ -7,6 +7,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import sound_1 from "../assets/sound_1.wav";
 
 import { ToggleSwitch } from "../comp/base/toggle-switch";
+import { SwitchActions } from "./types";
 
 const App: FC = () => {
   const [isThemeActive, setThemeActive] = useState<boolean>(false);
@@ -14,7 +15,7 @@ const App: FC = () => {
   const [isToggleAll, setToggleAll] = useState<boolean>(true);
 
   // stack функций
-  const [stack, setStack] = useState<string[]>(["changeAll"]);
+  const [stack, setStack] = useState<string[]>([SwitchActions.ALL]);
 
   // Смена темы
   const { toggleTheme } = useTheme();
@@ -64,13 +65,13 @@ const App: FC = () => {
   useEffect(() => {
     if (stack.length === 3) {
       switch (stack[1]) {
-        case "theme":
+        case SwitchActions.THEME:
           toggleThemeState();
           break;
-        case "audio":
+        case SwitchActions.AUDIO:
           toggleAudioState();
           break;
-        case "changeAll":
+        case SwitchActions.ALL:
           toggleAll();
           break;
       }
@@ -89,20 +90,20 @@ const App: FC = () => {
   function toggleThemeState() {
     toggleTheme();
     setThemeActive((prev) => !prev);
-    updateStack("theme");
+    updateStack(SwitchActions.THEME);
   }
 
   function toggleAudioState() {
     toggleAudio();
     setAudioActive((prev) => !prev);
-    updateStack("audio");
+    updateStack(SwitchActions.AUDIO);
   }
 
   function toggleAll() {
     toggleAudioState();
     toggleThemeState();
     setToggleAll((prev) => !prev);
-    updateStack("changeAll");
+    updateStack(SwitchActions.ALL);
   }
 
   return (
